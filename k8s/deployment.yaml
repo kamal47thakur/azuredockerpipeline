@@ -1,33 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodejs-app
+  name: nginx-app
   labels:
-    app: nodejs-app
+    app: nginx-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nodejs-app
+      app: nginx-app
   template:
     metadata:
       labels:
-        app: nodejs-app
+        app: nginx-app
     spec:
       containers:
-        - name: nodejs-container
-          image: sampleapp   # Replace with your image name
-          ports:
-            - containerPort: 3000
-          # Optional: set environment variables
-          env:
-            - name: NODE_ENV
-              value: production
-          # Optional: resources
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
+      - name: nginx-container
+        image: pwimsdevacr.azurecr.io/nginx-app:latest
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      imagePullSecrets:
+      - name: acr-secret # only if using private ACR
